@@ -18,12 +18,14 @@ Installation Instructions
 3) Create some database connections in config.pl
 
 4) Create some users
+
    execute from command line 
    perl index.pl
 
 5) Point web browser to https://yourserver/websql
 
 6) You may need to add the following apache config:
+
    <Directory /path/to/your/htdocs/websql>
      AllowOverride All
      Order Deny,Allow
