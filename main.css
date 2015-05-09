@@ -1,0 +1,166 @@
+* {
+  vertical-align:middle;
+  box-sizing:border-box;
+}
+body {
+  font-family: sans-serif;
+  margin:0;
+  height:100%;
+  position:relative;
+}
+table{
+  border-collapse:collapse;
+  width:99%;
+}
+form{
+  margin:0;
+}
+button,a.button,label.ckbox{
+  font-size:10px;
+  box-shadow:inset 0px 1px 0px 0px #ffffff;
+  font-weight:bold;
+  background-color:#ededed;
+  border:1px solid #aaa;
+  color:#444;
+  font-family:arial;
+  text-align:center;
+  text-shadow:1px 1px 0px #fff;
+  padding:2px;
+  cursor:pointer;
+  user-select:none;
+  border-radius:2px;
+}
+
+button[disabled],label.ckbox.disabled {
+  cursor:not-allowed;
+  background-color:#fff;
+  color:#666;
+}
+
+button:hover, input[type=button]:hover, input[type=submit]:hover, a.button:hover, label.ckbox:hover {
+  color:#666;
+}
+
+a.button, label.ckbox {
+  display:inline-block;
+  text-decoration:none;
+}
+
+input, textarea {
+  color:blue;
+  padding:6px;
+  outline:0!important;
+}
+
+.cmdbar {
+  text-align:right;
+  position:absolute;
+  bottom:0;right:20px;
+  width:32em;
+  height:2em;
+  background-color:#fff;
+}
+
+#sqleditor{
+  resize:none;
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+input:focus {
+  background-color:#ffc;
+}
+
+label {
+  font-weight:bold;
+  color:#444;
+}
+
+table {
+  font-size:.8em;
+  border-collapse:collapse;
+}
+
+th {
+  font-weight:normal;
+  color:white;
+  background-color:#376879;
+  text-align:center;
+  padding:4px 2px;
+  border:1px solid #3D5280;
+  font-size:9px;
+}
+
+td {
+  margin:0;
+  border:1px solid #ccc;
+  overflow:hidden;
+}
+
+tr:nth-child(even) {
+  background-color:#eee;
+}
+
+td.rownum {
+  color:#666;
+  text-align:right;
+  font-size:.8em;
+  border:0;
+  background-color:transparent !important;
+}
+
+p {
+  padding:10px;
+}
+
+pre {
+  padding:10px;
+  color:#222;
+}
+
+.msgbox {
+  margin:10px auto;
+  display:block;
+  box-shadow:inset 0px 1px 0px 0px #fff;
+  background-color:#efefef;
+  border-radius:2px;
+  border:1px solid #bbb;
+  color:#222;
+  padding:16px;
+  max-width:500px;
+}
+
+.outputcmdbar textarea {
+  font-size:10px;
+  color:#666;
+  height:25px;
+  border:1px solid #ccc;
+  width:200px;
+  resize:both;
+}
+
+.outputcmdbar {
+  padding:10px;
+}
+
+button.bigger {
+  font-size:16px;
+  padding:10px;
+  margin:10px;
+}
+
+.resultsql {
+  background-color:#DEF;
+  padding:6px;
+}
+
+.resulterrmsg {
+  background-color:#fdd;
+  padding:6px;
+}
+
+.resulterrblock {
+  display:block;
+  white-space:pre-wrap;
+}

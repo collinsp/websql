@@ -1,0 +1,16 @@
+# to add a user, run "websql/index.pl" from command line then paste the config here
+%WEBSQL::USERS = (
+
+);
+
+# provide connection configuration
+%WEBSQL::CONNECTIONS = (
+
+  # see perldoc DBI, for more info
+  # 'alias' => {
+  #   dsn => 'dbi:Oracle:dbname',
+  #   user => 'dbuser',
+  #   pass => 'dbpass'
+  # },
+
+);
