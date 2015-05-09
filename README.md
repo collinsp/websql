@@ -4,6 +4,7 @@ WebSQL - A simple multi database supported SQL console in your web browser
 Installation Instructions
 
 1) Install dependancies:
+
   # install from OS packages
   sudo yum install perl-CGI perl-CGI-Session perl-DBI perl-URI
 
