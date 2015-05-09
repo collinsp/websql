@@ -13,4 +13,17 @@
   #   pass => 'dbpass'
   # },
 
+  # advanced postgres example
+  #'foo' => {
+  #  dsn => 'dbi:Pg:dbname=foo;host=127.0.0.1;port=5432',
+  #  user => 'postgres',
+  #  pass => 'postgres',
+  #  initsql => "SET search_path=foo,phpbb,public;",
+  #  dictionary => sub {
+  #    local $ENV{PGPASSWORD} = 'postgres';
+  #    my $out = `pg_dump -x -p 5432 -h 127.0.0.1 -U postgres -n foo -n phpbb foo --schema-only`;
+  #    return $out;
+  #  }
+  #},
+
 );
