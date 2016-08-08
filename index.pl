@@ -205,23 +205,31 @@ sub dbh {
   if ($$dbh{Driver}{Name} =~ /Oracle/i) {
     $dbh->do("ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'");
   }
-  map { $dbh->do($_) } parse_sql_buffer($$c{initsql});
+  my $sql;
+  eval {
+    foreach $sql (parse_sql_buffer($$c{initsql})) {
+      $dbh->do($sql);
+    }
+  };
+  if ($@) {
+    die "initsql error: $@";   
+  }
   return $dbh;
+}
+
+sub extract_hilight {
+  my ($sql) = @_;
+  $sql =~ s/\r\n/\n/gs;
+  my $selStart = int(param('selStart')) || 0;
+  my $selEnd = int(param('selEnd')) || length($sql);
+  $sql = substr($sql, $selStart, $selEnd - $selStart) if $selStart < $selEnd;
+  return $sql; 
 }
 
 # parse the sql buffer. returns array of sql statements to execute.
 sub parse_sql_buffer {
   my ($sql) = @_;
   $sql =~ s/\r\n/\n/gs;
-
-  # handle if user hilights a statement
-  my $selStart = int(param('selStart')) || 0;
-  my $selEnd = int(param('selEnd')) || length($sql);
-  if ($selStart < $selEnd) {
-    $sql = substr($sql, $selStart, $selEnd - $selStart);
-    $selStart = 0;
-    $selEnd = length($sql) - 1;
-  }
 
   # strip comments
   $sql =~ s/\-\-.*$//mg;
@@ -306,7 +314,7 @@ $cssLink
 $notifications
 <form method=post class=msgbox style='width:300px;'>
 ".csrf_token().'
-<p><label>username<br>'.$q->textfield('user').'</label>
+<p><label>username<br>'.$q->textfield(-name => 'user', -autofocus=>1).'</label>
 <p><label>password<br>'.$q->password_field('pass').'</label>
 <p align=center>
 <button type=submit name=act value=login class=bigger>login</button>
@@ -456,7 +464,7 @@ sub act_execute_format_html_next {
 # execute queries and display results as html
 sub act_execute_format_html {
   csrf_check();
-  my @sql_queries = parse_sql_buffer(param('sql'));
+  my @sql_queries = parse_sql_buffer(extract_hilight(param('sql')));
   my $buf;
   my $token = csrf_token();
   my $last_sql;
