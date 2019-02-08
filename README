@@ -35,3 +35,6 @@ Installation Instructions
      Deny from all
      Allow from all
    </Directory>
+
+5) Ensure your file permissions/SELinux security contexts are assigned by executing:
+    sudo perl fix_file_permissions.pl
