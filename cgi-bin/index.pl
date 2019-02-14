@@ -11,6 +11,9 @@ use MIME::Base64;
 # package globals reset for each request
 our ($q, $dbh, $session, %USERS, %CONNECTIONS);
 
+# upgrade to utf-8
+binmode STDOUT, ":utf8";
+
 # load runtime config
 use FindBin qw($Bin);
 require "$Bin/../conf/config.pl";
@@ -133,6 +136,9 @@ sub http_header {
   my %opts = @_;
   $opts{-x_frame_options} ||= 'SAMEORIGIN';
   $opts{-Cache_Control} ||= 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0';
+  $opts{-Referrer_Policy} ||= "no-referrer";
+  $opts{-charset} ||= 'utf-8';
+  $opts{-Content_Security_Policy} = "default-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src * 'self' 'unsafe-inline' data:; img-src * blob: data:; media-src *; frame-src *; worker-src 'none'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content;";
   return CGI::header(%opts);
 }
 
@@ -237,9 +243,27 @@ sub ymdhms {
 ################################################
 
 my $frameBuster = '<script>if(top!=self)top.location.href=self.location.href;</script>';
+my $defaultHead = '<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<link rel="shortcut icon" href="favicon.ico?v=2">
+<link rel=stylesheet href="main.css?v=1">
+<title>WebSQL</title>';
 
-my $faviconLink = '<link rel="shortcut icon" href="favicon.ico?v=2">';
-my $cssLink = '<link rel=stylesheet href="main.css?v=1">';
+sub html_header {
+  my @extra = @_;
+  return qq~<!DOCTYPE html>
+<html>
+<head>
+$defaultHead
+~.join("\n", @extra).qq~
+</head>
+<body>~;
+}
+
+sub html_footer {
+  my @extra = @_;
+  return join("\n", @extra)."</body></html>";
+}
 
 # the login form
 sub act_loginform {
@@ -263,14 +287,7 @@ sub act_loginform {
     -secure   => ($q->url() =~ /^https/) ? 1 : 0
   );
   
-  print http_header(-cookie => $cookie),
-"<html>
-<head>
-$frameBuster
-$faviconLink
-$cssLink
-</head>
-<body>
+  print http_header(-cookie => $cookie), html_header($frameBuster)."
 <h1 align=center>WebSQL Login</h1>
 $notifications
 <form method=post class=msgbox style='width:300px;'>
@@ -279,9 +296,7 @@ $notifications
 <p><label>password<br>'.$q->password_field('pass').'</label>
 <p align=center>
 <button type=submit name=act value=login class=bigger>login</button>
-</form>
-</body>
-</html>';
+</form>'.html_footer();
 }
 
 # handle login
@@ -301,12 +316,11 @@ sub act_login {
 
 # load the main frame, called after successful login
 sub act_loadframeset {
-  print http_header(),
-"<html>
+  print http_header(), "<!DOCTYPE html>
+<html>
 <head>
+$defaultHead
 $frameBuster
-$faviconLink
-<title>WebSQL</title>
 </head>
 <frameset rows='*,300'>
   <frame name=results src='instructions.html'>
@@ -334,20 +348,16 @@ sub act_dictionary {
   } else {
     $buf = "<p style='color:#888;position:absolute;bottom:40%;width:100%;text-align:center;'>Select a database dictionary to display."; 
   }
-  print http_header(),
-"<html>
-<head>$cssLink</head>
-<body>
+  print http_header(), html_header(), "
 $buf
-<form>
+<form class=fill>
 <div class=cmdbar style='width:13em;'>
 ".$q->popup_menu(-name => 'connection', -values => $USERS{$session->param('user')}{connections})."
 <button type=submit name=act value=dictionary>&#9658;</button>
 </div>
 </form>
 <a style='position:absolute;top:0;right:20px;' href='?act=loginform' target=_top class=button>logout</a>
-</body>
-</html>";
+".html_footer();
 }
 
 # execute SQL queries
@@ -361,13 +371,8 @@ sub act_execute {
 # load the coding frame
 sub act_codewindow {
   param('connection', $session->param('last_connection')) unless param('connection');
-  print http_header(),"
-<html>
-<head>
-$cssLink
-</head>
-<body>
-<form target=results method=post>
+  print http_header(), html_header(), "
+<form class=fill target=results method=post>
 ".csrf_token()."
   <input type=hidden name=selStart>
   <input type=hidden name=selEnd>
@@ -398,9 +403,8 @@ f.onsubmit = function(){
   f.selStart.value = f.sql.selectionStart;
   f.selEnd.value   = f.sql.selectionEnd;
 };
-</script>
-</body>
-</html>";
+</script>", html_footer();
+  return undef;
 }
 
 # load previous page in query
@@ -482,7 +486,8 @@ sub act_execute_format_html {
     $err =~ s/\ at\ .*?\ line\ \d+\.$//;
     $buf = "<pre class=resulterrblock><div class=resultsql><strong>SQL:</strong>\n".escape_html($last_sql)."</div>\n<div class=resulterrmsg><strong>ERROR:</strong>\n".escape_html($err)."</div></pre>";
   }
-  print http_header(), "<html><head>$cssLink</head><body>$buf</body></html>";
+  print http_header(), html_header(), $buf, html_footer();
+  return undef;
 }
 
 # execute single query and display results as csv
@@ -523,7 +528,7 @@ sub handler {
     $session->flush() if $session;
     $dbh->disconnect() if $dbh;
   }; if ($@) {
-    print http_header(), "<!DOCTYPE html>\n<html>\n<head>$cssLink</head>\n<body>\n<h1>Exception:</h1><div style='whitespace:pre-line;'>".escape_html($@)."</div>\n</body>\n</html>";
+    print http_header(), html_header(), "<h1>Exception:</h1><div style='whitespace:pre-line;'>".escape_html($@)."</div>", html_footer();
   }
   return undef;
 }

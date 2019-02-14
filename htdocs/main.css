@@ -2,18 +2,21 @@
   vertical-align:middle;
   box-sizing:border-box;
 }
+html, body {
+  height:100%;
+}
 body {
   font-family: sans-serif;
   margin:0;
-  height:100%;
   position:relative;
 }
 table{
   border-collapse:collapse;
   width:99%;
 }
-form{
+form.fill {
   margin:0;
+  height: 99%;
 }
 button,a.button,label.ckbox{
   font-size:10px;
@@ -58,7 +61,6 @@ input, textarea {
   bottom:0;right:20px;
   width:32em;
   height:2em;
-  background-color:#fff;
 }
 
 #sqleditor{
