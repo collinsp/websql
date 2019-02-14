@@ -13,46 +13,7 @@ our ($q, $dbh, $session, %USERS, %CONNECTIONS);
 
 # load runtime config
 use FindBin qw($Bin);
-require "$Bin/config.pl";
-
-# if not running in CGI mode, do interactive shell
-if (! $ENV{HTTP_HOST}) {
-  print "Add User\n";
-  my ($user, $pass);
-  while(! $user) {
-    print "username: ";
-    $_=<STDIN>; chomp; $user=$_ if /^\S+$/;
-  }
-
-  system("stty -echo");
-  while ($pass eq '') {
-    while(! $pass) {
-      print "password: ";
-      $_=<STDIN>; chomp; $pass=$_ if /^\S+$/;
-    }
-    my $pass2;
-    while(! $pass2) {
-      print "\nrepeat password: ";
-      $_=<STDIN>; chomp; $pass2=$_ if /^\S+$/;
-    }
-    if ($pass ne $pass2) {
-      print "\nPasswords do not match. Try again.\n";
-      $pass='';
-    }
-  }
-  system("stty echo");
-  my $salt = join('',('.','/',0 .. 9,'A'..'Z','a'..'z')[rand 64, rand 64]);
-  my $hash = crypt($pass, $salt);
-  print "\n\nAdd the following line to %USERS
-
-  '$user' => {
-    crypthash => '$hash',
-    connections => [".join(',', map { "'$_'" } sort keys %CONNECTIONS)."]
-  },\n\n";
-  exit(0);
-}
-
-
+require "$Bin/../conf/config.pl";
 
 # database drivers to add limit/offset to sql
 # sql is an array ref where elem 0 is sql, and other elems are binds
@@ -549,16 +510,22 @@ sub act_execute_format_csv {
 ################################################
 sub handler {
   local ($q, $dbh, $session);
-  $q = new CGI();
-  $session = new CGI::Session();
-  $dbh = dbh();
 
-  # make sure user is using login actions if not logged in
-  param('act', 'loginform') if param('act') !~ /^(login|css)$/ && ! $USERS{$ENV{REMOTE_USER}} && ! $USERS{$session->param('user')};
+  eval {
+    $q = new CGI();
+    $session = new CGI::Session();
+    $dbh = dbh();
 
-  (__PACKAGE__->can('act_'.param('act')) || \&act_loadframeset)->();
-  $session->flush() if $session;
-  $dbh->disconnect() if $dbh;
+    # make sure user is using login actions if not logged in
+    param('act', 'loginform') if param('act') !~ /^(login|css)$/ && ! $USERS{$ENV{REMOTE_USER}} && ! $USERS{$session->param('user')};
+
+    (__PACKAGE__->can('act_'.param('act')) || \&act_loadframeset)->();
+    $session->flush() if $session;
+    $dbh->disconnect() if $dbh;
+  }; if ($@) {
+    print http_header(), "<!DOCTYPE html>\n<html>\n<head>$cssLink</head>\n<body>\n<h1>Exception:</h1><div style='whitespace:pre-line;'>".escape_html($@)."</div>\n</body>\n</html>";
+  }
+  return undef;
 }
 handler() unless caller;
 1;

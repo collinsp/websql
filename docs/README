@@ -1,0 +1,28 @@
+WebSQL - A simple multi database supported SQL console in your web browser
+
+Databases currently supported:
+Oracle, Postgres, Mysql, SQLite
+
+Installation Instructions
+-------------------------
+1) Install dependancies:
+  sudo yum install perl-CGI perl-CGI-Session perl-DBI perl-URI
+
+  # or install the following using CPAN
+  # CGI CGI::Session DBI URI::Escape
+
+2) Configure database connections.
+   cp conf/config.pl.sample conf/config.pl
+   vim conf/config.pl
+
+3) Add users and specify database connections user is allowed to access.
+   bin/add_user.pl
+
+4) Configure Apache 
+   cp conf/apache/apache.conf.sample conf/apache/apache.conf
+   vim conf/apache/apache.conf
+   sudo perl bin/fix_file_permissions.pl
+   cd /etc/httpd/conf.d
+   sudo ln -s /web/websql/conf/apache/apache.conf websql.conf
+   sudo apachectl configtest
+   sudo apachectl restart

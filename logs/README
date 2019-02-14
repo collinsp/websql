@@ -1,0 +1,2 @@
+default location for apache access logs and error logs files 
+please do not remove, since a dummy file (like this one) is neccessary for git to automatically create the logs directory

@@ -1,1 +1,3 @@
-/config.pl
+/conf/config.pl
+/conf/apache/apache.conf
+/logs/*.log

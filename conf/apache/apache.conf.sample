@@ -1,0 +1,27 @@
+<VirtualHost *:80>
+  ServerName websql.sr.unh.edu
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+
+<VirtualHost *:443>
+  ServerName websql.sr.unh.edu
+  DocumentRoot /web/websql/htdocs
+  ScriptAlias /web/websql/cgi-bin
+  ErrorLog /web/websql/logs/error.log
+  TransferLog /web/websql/logs/access.log
+
+  SSLEngine On
+  SSLCertificateFile /web/wildcard-cert/wildcard.sr.unh.edu_InCommon_20190312.crt
+  SSLCertificateKeyFile /web/wildcard-cert/wildcard.sr.unh_edu.key
+  SSLCertificateChainFile /web/wildcard-cert/InCommonChain.crt
+
+  RewriteEngine On
+  RewriteRule "^/?$"      /cgi-bin/index.pl [R,L]
+
+  <Directory />
+    AllowOverride None
+    Require all granted
+  </Directory>
+</VirtualHost>
